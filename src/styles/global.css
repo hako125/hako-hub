@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+:root {
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+}
+
+@theme {
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+
+  /* Terminal surface palette */
+  --color-surface-950: #030303;
+  --color-surface-900: #050505;
+  --color-surface-800: #0a0a0a;
+  --color-surface-700: #0f0f0f;
+  --color-surface-600: #111111;
+  --color-surface-500: #121212;
+
+  /* Micro typography (below the default text-xs scale) */
+  --text-2xs: 0.6875rem;
+  --text-3xs: 0.625rem;
+
+  /* Wide letter spacing beyond tracking-widest */
+  --tracking-brand: 0.2em;
+  --tracking-brand-wide: 0.3em;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  color: #fff;
+  background-color: var(--color-surface-950);
+  background-image:
+    radial-gradient(circle at var(--mouse-x) var(--mouse-y), #10b98126 0%, transparent 40%),
+    linear-gradient(#10b98108 1px, transparent 1px),
+    linear-gradient(90deg, #10b98108 1px, transparent 1px);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
+  background-attachment: fixed;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+/* Grain overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.02;
+  pointer-events: none;
+  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+  width: 100%;
+  height: 100%;
+}
+
+/* ----- Scroll reveal (replaces framer-motion whileInView) ----- */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition:
+    opacity 0.8s ease-out,
+    transform 0.8s ease-out;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ----- Blinking terminal cursor ----- */
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.term-cursor {
+  animation: blink 1s step-end infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

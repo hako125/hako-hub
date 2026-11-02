@@ -1,0 +1,81 @@
+---
+import SectionWrapper from "./SectionWrapper.astro";
+import SectionHeader from "./SectionHeader.astro";
+import { skillModules } from "../data/site";
+---
+
+<SectionWrapper id="skills" class="border-t border-gray-800/50">
+  <div slot="header" class="flex flex-col justify-between gap-8 md:flex-row md:items-center">
+    <SectionHeader
+      command="sudo apt install skills"
+      subtitle="Scanning local repositories... Found 4 core modules."
+    />
+
+    <!-- AWS credential badge -->
+    <div class="group relative">
+      <div
+        class="absolute -inset-1 rounded-lg bg-orange-500/20 opacity-40 blur transition duration-500 group-hover:opacity-100"
+      >
+      </div>
+      <div
+        class="relative flex items-center gap-4 overflow-hidden rounded-lg border border-orange-500/30 bg-surface-900 p-2 pr-6"
+      >
+        <img
+          src="/aws-badge.png"
+          alt="AWS Academy Graduate - Cloud Foundations"
+          class="h-16 w-16 shrink-0 object-contain md:h-20 md:w-20"
+          loading="lazy"
+          width="125"
+          height="125"
+        />
+        <div class="text-left font-mono">
+          <p
+            class="mb-1 text-3xs font-bold uppercase leading-none tracking-widest text-orange-500"
+          >
+            Verified_Credential
+          </p>
+          <h4 class="text-xs font-bold leading-tight text-gray-200 md:text-sm">
+            AWS Academy Graduate
+          </h4>
+          <p class="mt-1 text-3xs text-gray-500">Cloud Foundations</p>
+        </div>
+        <div class="absolute right-1 top-1">
+          <svg
+            class="size-3 text-orange-500/50"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+              clip-rule="evenodd"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+    {
+      skillModules.map((module, index) => (
+        <div class="group relative rounded-lg border border-gray-800 bg-surface-900 p-6 transition-all duration-500 hover:border-emerald-500/40">
+          <div class="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100">
+            <span class="font-mono text-3xs text-emerald-500/50">
+              MOD_0{index + 1}
+            </span>
+          </div>
+          <h3 class="mb-6 border-b border-gray-800 pb-2 font-mono text-xs uppercase tracking-brand text-emerald-400">
+            {module.category}
+          </h3>
+          <div class="flex flex-wrap gap-2">
+            {module.items.map((item) => (
+              <span class="cursor-default rounded border border-gray-800 bg-surface-600 px-3 py-1 font-mono text-2xs text-gray-400 transition-colors hover:border-emerald-500/30 hover:text-emerald-400">
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</SectionWrapper>

@@ -1,0 +1,134 @@
+---
+import SectionWrapper from "./SectionWrapper.astro";
+import SectionHeader from "./SectionHeader.astro";
+import { experiences, profile } from "../data/site";
+
+const accents = {
+  emerald: {
+    border: "border-l-emerald-500",
+    year: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
+    role: "text-emerald-400",
+  },
+  blue: {
+    border: "border-l-blue-500",
+    year: "bg-blue-500/10 text-blue-400 border-blue-500/30",
+    role: "text-blue-400",
+  },
+} as const;
+
+const key = "text-blue-400";
+const str = "text-emerald-400";
+const punct = "text-gray-400";
+---
+
+<SectionWrapper id="about" class="mt-10 border-t border-gray-800/50">
+  <div slot="header">
+    <SectionHeader command="whoami" subtitle="Retrieving user_profile.json... 200 OK" />
+  </div>
+
+  <div class="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
+    <!-- profile.json terminal -->
+    <div class="group relative overflow-hidden rounded-lg border border-gray-800 bg-surface-900 shadow-2xl lg:col-span-7">
+      <div
+        class="absolute -inset-1 rounded-lg bg-linear-to-r from-emerald-600/10 to-blue-600/10 opacity-50 blur transition duration-1000 group-hover:opacity-100"
+      >
+      </div>
+      <div class="relative z-10">
+        <div class="flex items-center gap-2 border-b border-gray-800 bg-surface-600 px-4 py-3">
+          <div class="size-3 rounded-full bg-gray-600"></div>
+          <div class="size-3 rounded-full bg-gray-600"></div>
+          <div class="size-3 rounded-full bg-gray-600"></div>
+          <span class="ml-4 font-mono text-xs text-gray-500">profile.json</span>
+        </div>
+        <div
+          class="overflow-x-auto p-6 font-mono text-sm leading-relaxed md:p-8 md:text-base"
+        >
+          <span class={punct}>{"{"}</span>
+
+          <div class="py-1 pl-6">
+            <span class={key}>"name"</span><span class={punct}>: </span><span
+              class={str}>"{profile.name}"</span
+            ><span class={punct}>,</span>
+          </div>
+
+          <div class="py-1 pl-6">
+            <span class={key}>"education"</span><span class={punct}>: </span><span
+              class={str}>"{profile.education}"</span
+            ><span class={punct}>,</span>
+          </div>
+
+          <div class="py-1 pl-6">
+            <span class={key}>"base_location"</span><span class={punct}>: </span><span
+              class={str}>"{profile.baseLocation}"</span
+            ><span class={punct}>,</span>
+          </div>
+
+          <div class="py-1 pl-6">
+            <span class={key}>"current_focus"</span><span class={punct}>: [</span>
+            {
+              profile.currentFocus.map((focus, i) => (
+                <Fragment>
+                  <br />
+                  <span class={`pl-6 ${str}`}>"{focus}"</span>
+                  {i < profile.currentFocus.length - 1 && (
+                    <span class={punct}>,</span>
+                  )}
+                </Fragment>
+              ))
+            }
+            <br />
+            <span class={punct}>],</span>
+          </div>
+
+          <div class="py-1 pl-6">
+            <span class={key}>"offline_interests"</span><span class={punct}>: [</span>
+            {
+              profile.offlineInterests.map((interest, i) => (
+                <Fragment>
+                  <span class={str}>"{interest}"</span>
+                  {i < profile.offlineInterests.length - 1 && (
+                    <span class={punct}>, </span>
+                  )}
+                </Fragment>
+              ))
+            }
+            <span class={punct}>]</span>
+          </div>
+
+          <span class={punct}>{"}"}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Experience cards -->
+    <div class="flex flex-col gap-6 lg:col-span-5">
+      {
+        experiences.map((exp) => {
+          const accent = accents[exp.accent];
+          return (
+            <div
+              class:list={[
+                "rounded-lg border border-gray-800 bg-surface-900 p-6 border-l-4 shadow-lg transition-colors hover:bg-surface-600",
+                accent.border,
+              ]}
+            >
+              <div class="mb-2 flex items-start justify-between">
+                <h4 class="text-xl font-bold text-gray-100">{exp.title}</h4>
+                <span
+                  class:list={[
+                    "rounded border px-2 py-1 font-mono text-xs",
+                    accent.year,
+                  ]}
+                >
+                  {exp.year}
+                </span>
+              </div>
+              <p class:list={["mb-3 font-mono text-sm", accent.role]}>{exp.role}</p>
+              <p class="text-sm leading-relaxed text-gray-400">{exp.description}</p>
+            </div>
+          );
+        })
+      }
+    </div>
+  </div>
+</SectionWrapper>

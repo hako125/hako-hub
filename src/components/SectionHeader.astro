@@ -1,0 +1,26 @@
+---
+interface Props {
+  /** Heading text, e.g. "whoami" */
+  command: string;
+  /** Small mono status line under the heading */
+  subtitle?: string;
+  subtitleClass?: string;
+}
+
+const { command, subtitle, subtitleClass = "mt-3 ml-8" } = Astro.props;
+---
+
+<div>
+  <h2
+    class="flex items-center gap-3 text-3xl font-bold tracking-tight text-gray-100 md:text-4xl"
+  >
+    <span class="font-mono text-2xl text-emerald-500">&gt;</span>{command}
+  </h2>
+  {
+    subtitle && (
+      <p class:list={["font-mono text-sm text-gray-500", subtitleClass]}>
+        {subtitle}
+      </p>
+    )
+  }
+</div>
