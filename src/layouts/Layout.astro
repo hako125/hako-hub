@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import { site } from "../data/site";
+import Footer from "../components/Footer.astro";
 
 interface Props {
   title?: string;
@@ -65,7 +66,7 @@ const { title = site.title, description = site.description } = Astro.props;
   </head>
   <body>
     <slot />
-
+    <Footer />
     <script>
       // ----- Theme toggle -----
       const THEME_KEY = "theme";
