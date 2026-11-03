@@ -1,0 +1,82 @@
+---
+import { accentClasses, type Category, type Article, formatDate } from "../../lib/blog";
+
+interface Props {
+  category: Category;
+  articles: Article[];
+}
+
+const { category, articles } = Astro.props;
+const tone = accentClasses[category.data.accent];
+const latest = articles.slice(0, 3);
+---
+
+<a
+  href={`/categories/${category.id}`}
+  class:list={[
+    "group relative flex h-full flex-col overflow-hidden rounded-lg border border-line bg-surface-900 p-6 shadow-lg transition-all duration-300 md:p-8",
+    tone.hover,
+    "hover:shadow-[0_0_20px_var(--brand)]/10",
+  ]}
+>
+  <div
+    class:list={[
+      "absolute inset-x-0 top-0 h-0.5 bg-linear-to-r from-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100",
+      category.data.accent === "brand" ? "via-brand" : "via-line-strong",
+    ]}
+  >
+  </div>
+
+  <div class="flex items-start justify-between gap-4">
+    <div>
+      <p class:list={["mb-2 font-mono text-2xs uppercase tracking-widest", tone.text]}>
+        [{category.data.abbr ?? category.id}]
+      </p>
+      <h3 class="text-xl font-bold tracking-tight text-ink transition-colors duration-300 group-hover:text-brand-ink md:text-2xl">
+        {category.data.name}
+      </h3>
+    </div>
+    <span
+      class:list={[
+        "flex size-12 shrink-0 items-center justify-center rounded-full border font-mono text-lg font-bold tabular-nums",
+        tone.border,
+        tone.bg,
+        tone.text,
+      ]}
+    >
+      {articles.length}
+    </span>
+  </div>
+
+  <p class="mt-3 text-sm leading-relaxed text-ink-muted">
+    {category.data.description}
+  </p>
+
+  <div class="mt-6 grow border-t border-line pt-4">
+    {
+      latest.length > 0 ? (
+        <ul class="space-y-2">
+          {latest.map((article) => (
+            <li class="flex items-baseline justify-between gap-3 font-mono text-2xs">
+              <span class="truncate text-ink-soft">{article.data.title}</span>
+              <time
+                datetime={article.data.pubDate.toISOString().slice(0, 10)}
+                class="shrink-0 text-ink-faint"
+              >
+                {formatDate(article.data.pubDate)}
+              </time>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="font-mono text-2xs uppercase tracking-widest text-ink-faint">
+          // no entries yet
+        </p>
+      )
+    }
+  </div>
+
+  <p class="mt-6 inline-flex items-center gap-1.5 font-mono text-2xs uppercase tracking-widest text-ink-faint transition-all duration-300 group-hover:gap-2.5 group-hover:text-ink-soft">
+    browse category <span aria-hidden="true">→</span>
+  </p>
+</a>

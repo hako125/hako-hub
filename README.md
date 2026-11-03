@@ -1,43 +1,73 @@
-# Astro Starter Kit: Minimal
+# Hako Hub
+
+Astro 7 + Tailwind CSS 4 personal site, with a content-collection driven blog.
 
 ```sh
-npm create astro@latest -- --template minimal
+npm run dev      # dev server (or: npx astro dev --background)
+npm run build    # production build to dist/
+npm run preview  # preview the build
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Blog structure
 
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+```
+src/
+├─ content.config.ts        # collections: articles (md) + categories (json)
+├─ content/
+│  ├─ articles/*.md         # one file per post
+│  └─ categories/*.json     # one file per category
+├─ lib/blog.ts              # queries, sorting, pagination, accents
+├─ components/blog/         # ArticleCard, CategoryCard, CategoryChip, Pagination
+├─ layouts/PageLayout.astro  # inner-page shell (navbar + footer + theme)
+└─ pages/
+   ├─ articles/index.astro          # /articles
+   ├─ articles/page/[page].astro    # /articles/page/2 ...
+   ├─ articles/[slug].astro         # /articles/<file-name>
+   ├─ categories/index.astro        # /categories
+   ├─ categories/[slug].astro       # /categories/<json-file-name>
+   └─ projects/index.astro          # /projects
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## Adding a project
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+Projects are a plain array in `src/data/site.ts`. Set `featured: true` on the two
+headline pieces — those are what the landing page shows; everything appears on
+`/projects`, grouped by `track`.
 
-Any static assets, like images, can be placed in the `public/` directory.
+## Adding a post
 
-## 🧞 Commands
+Create `src/content/articles/my-post.md` — the filename becomes the URL
+(`/articles/my-post`).
 
-All commands are run from the root of the project, from a terminal:
+```yaml
+---
+title: "Post title"
+description: "One sentence used for cards, meta description and OG tags."
+pubDate: 2026-02-01
+updatedDate: 2026-02-10 # optional
+category: systems # must match a file name in src/content/categories
+tags: ["Rust", "Networking"]
+draft: false # drafts are hidden in production, visible in dev
+minutes: 7 # optional; otherwise estimated at ~200 wpm
+---
+```
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+Headings (`##`) are picked up automatically for the on-page table of contents.
 
-## 👀 Want to learn more?
+## Adding a category
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Create `src/content/categories/my-topic.json`. An empty category is fine — its
+page renders an empty state instead of 404-ing.
+
+```json
+{
+  "name": "My Topic",
+  "abbr": "MTP",
+  "description": "What belongs in this category.",
+  "accent": "tag-b",
+  "order": 50
+}
+```
+
+`accent` must be one of `brand`, `tag-a`, `tag-b`, `tag-c` — those map to the
+theme tokens in `src/styles/global.css`, so chips stay correct in light mode.

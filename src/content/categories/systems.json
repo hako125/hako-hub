@@ -1,0 +1,7 @@
+{
+  "name": "Systems",
+  "abbr": "SYS",
+  "description": "Rust, C, and the layer underneath the framework. Performance, memory, and hardware-adjacent work.",
+  "accent": "tag-a",
+  "order": 20
+}

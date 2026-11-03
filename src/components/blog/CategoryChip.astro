@@ -1,0 +1,41 @@
+---
+import { accentClasses, type Accent } from "../../lib/blog";
+
+interface Props {
+  name: string;
+  accent?: Accent;
+  /** Optional trailing count, rendered as a mono badge. */
+  count?: number;
+  href?: string;
+  active?: boolean;
+}
+
+const { name, accent = "brand", count, href, active = false } = Astro.props;
+const tone = accentClasses[accent];
+
+const base =
+  "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 font-mono text-2xs uppercase tracking-widest transition-colors";
+
+const classes = active
+  ? [base, "border-transparent", tone.bg, tone.text]
+  : [base, "border-line bg-glass text-ink-muted hover:text-ink", tone.hover];
+---
+
+{
+  href ? (
+    <a href={href} class:list={classes} aria-current={active ? "page" : undefined}>
+      <span
+        class:list={["size-1.5 rounded-full", active ? tone.dot : "bg-current"]}
+        aria-hidden="true"
+      />
+      {name}
+      {count !== undefined && <span class="text-ink-faint">{count}</span>}
+    </a>
+  ) : (
+    <span class:list={classes}>
+      <span class:list={["size-1.5 rounded-full", tone.dot]} aria-hidden="true" />
+      {name}
+      {count !== undefined && <span class="text-ink-faint">{count}</span>}
+    </span>
+  )
+}

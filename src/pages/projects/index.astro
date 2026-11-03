@@ -1,0 +1,162 @@
+---
+import PageLayout from "../../layouts/PageLayout.astro";
+import SectionHeader from "../../components/SectionHeader.astro";
+import ProjectCard from "../../components/projects/ProjectCard.astro";
+import { featuredProjects, projects, projectTracks, site } from "../../data/site";
+
+// Group once, keeping declaration order inside each track and featured first.
+const groups = projectTracks
+  .map((track) => ({
+    track,
+    items: projects
+      .filter((project) => project.track === track.id)
+      .sort(
+        (a, b) =>
+          Number(b.featured ?? false) - Number(a.featured ?? false) ||
+          b.year - a.year,
+      ),
+  }))
+  .filter((group) => group.items.length > 0);
+
+const repoCount = projects.filter((project) => project.repo).length;
+const years = projects.map((project) => project.year);
+const span = years.length
+  ? `${Math.min(...years)}–${Math.max(...years)}`
+  : "—";
+
+const stackCount = new Set(projects.flatMap((project) => project.stack)).size;
+---
+
+<PageLayout
+  title="Projects"
+  description="Hardware, machine learning, systems and full-stack work — the things I actually built."
+>
+  <main class="mx-auto max-w-[90%] px-6 pb-24 2xl:max-w-350">
+    <header class="reveal py-12 md:py-16">
+      <div
+        class="mb-6 inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand-soft px-3 py-1"
+      >
+        <span class="size-2 animate-pulse rounded-full bg-brand"></span>
+        <p class="font-mono text-2xs uppercase tracking-widest text-brand-ink">
+          repo.index: {projects.length} entries
+        </p>
+      </div>
+
+      <SectionHeader
+        command="projects"
+        subtitle="// shipped things — printed circuit boards, trained models, packet parsers, and the occasional website"
+      />
+
+      <dl
+        class="mt-8 grid grid-cols-2 gap-4 border-y border-line py-5 font-mono text-2xs uppercase tracking-widest md:grid-cols-4"
+      >
+        <div>
+          <dt class="text-ink-faint">projects</dt>
+          <dd class="mt-1 text-lg text-ink tabular-nums">{projects.length}</dd>
+        </div>
+        <div>
+          <dt class="text-ink-faint">public repos</dt>
+          <dd class="mt-1 text-lg text-ink tabular-nums">{repoCount}</dd>
+        </div>
+        <div>
+          <dt class="text-ink-faint">technologies</dt>
+          <dd class="mt-1 text-lg text-ink tabular-nums">{stackCount}</dd>
+        </div>
+        <div>
+          <dt class="text-ink-faint">span</dt>
+          <dd class="mt-1 text-lg text-ink">{span}</dd>
+        </div>
+      </dl>
+
+      <nav aria-label="Jump to track" class="mt-6 flex flex-wrap gap-2">
+        {
+          groups.map((group) => (
+            <a
+              href={`#track-${group.track.id}`}
+              class="inline-flex items-center gap-2 rounded-full border border-line bg-glass px-3 py-1.5 font-mono text-2xs uppercase tracking-widest text-ink-muted transition-colors hover:border-brand/50 hover:text-brand-ink"
+            >
+              {group.track.label}
+              <span class="text-ink-faint">{group.items.length}</span>
+            </a>
+          ))
+        }
+      </nav>
+
+      {
+        featuredProjects.length > 0 && (
+          <p class="mt-6 font-mono text-2xs uppercase tracking-widest text-ink-faint">
+            ★ featured:{" "}
+            {featuredProjects.map((project, index) => (
+              <>
+                {index > 0 && <span>, </span>}
+                <a
+                  href={`#${project.slug}`}
+                  class="text-brand-ink underline decoration-brand/40 underline-offset-2 transition-colors hover:decoration-brand"
+                >
+                  {project.title}
+                </a>
+              </>
+            ))}
+          </p>
+        )
+      }
+    </header>
+
+    {
+      groups.map((group) => (
+        <section
+          id={`track-${group.track.id}`}
+          class="reveal mt-8 scroll-mt-24 border-t border-line pt-10"
+        >
+          <div class="flex flex-wrap items-end justify-between gap-3">
+            <h2 class="flex items-center gap-3 text-xl font-bold tracking-tight text-ink md:text-2xl">
+              <span class="font-mono text-lg text-brand-ink">&gt;</span>
+              {group.track.label}
+            </h2>
+            <span class="font-mono text-2xs uppercase tracking-widest text-ink-faint">
+              {group.items.length} {group.items.length === 1 ? "project" : "projects"}
+            </span>
+          </div>
+
+          {/*
+            A lone project in a track would sit in a half-width column and read
+            as a layout bug, so single-item tracks span the full row instead.
+          */}
+          <div
+            class:list={[
+              "mt-6 grid gap-6 lg:gap-8",
+              group.items.length === 1
+                ? "grid-cols-1"
+                : "grid-cols-1 lg:grid-cols-2",
+            ]}
+          >
+            {group.items.map((project) => (
+              <ProjectCard project={project} featured={project.featured} />
+            ))}
+          </div>        </section>
+      ))
+    }
+
+    <aside
+      class="reveal mt-16 rounded-lg border border-line bg-surface-900 p-6 md:p-8"
+    >
+      <h2 class="font-mono text-2xs uppercase tracking-widest text-ink-faint">
+        // more on github
+      </h2>
+      <p class="mt-3 text-sm leading-relaxed text-ink-muted md:text-base">
+        Everything that is not written up here lives in the repositories —
+        experiments, abandoned branches, and the occasional thing that worked
+        first try.
+      </p>
+      <a
+        href={site.github}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="group mt-5 inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 font-mono text-2xs font-semibold uppercase tracking-widest text-brand-contrast transition-transform duration-300 hover:scale-105"
+      >
+        github/@{site.githubHandle}
+        <span aria-hidden="true" class="transition-transform duration-300 group-hover:translate-x-1">→</span>
+      </a>
+    </aside>
+  </main>
+</PageLayout>

@@ -1,0 +1,186 @@
+---
+import { navLinks, site, socials } from "../data/site";
+
+/**
+ * Site footer, shared by the landing page and every inner page.
+ *
+ * Four zones: identity + status line, navigation, elsewhere (socials), and the
+ * colophon with a live clock. The clock is progressive enhancement — the
+ * static render already shows a sensible value, so nothing breaks without JS.
+ */
+const year = new Date().getFullYear();
+---
+
+<footer class="relative border-t border-line bg-surface-950/40">
+  <div
+    class="mx-auto max-w-[90%] px-6 py-14 2xl:max-w-350"
+  >
+    <div class="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+      <!-- Identity -->
+      <div class="lg:col-span-2">
+        <a
+          href="/"
+          class="group inline-flex items-center gap-2 text-lg font-bold tracking-tighter text-ink"
+        >
+          <span class="font-mono text-brand-ink">root@</span>{site.handle}<span
+            class="text-brand-ink">.</span
+          >
+        </a>
+        <p class="mt-3 max-w-sm text-sm leading-relaxed text-ink-muted">
+          {site.tagline}. Notes on systems, security, machine learning and the
+          homelab that runs it all.
+        </p>
+
+        <div
+          class="mt-5 inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand-soft px-3 py-1"
+        >
+          <span class="size-2 animate-pulse rounded-full bg-brand"></span>
+          <p class="font-mono text-2xs uppercase tracking-widest text-brand-ink">
+            all systems nominal
+          </p>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav aria-label="Footer navigation">
+        <h2 class="font-mono text-2xs uppercase tracking-widest text-ink-faint">
+          // index
+        </h2>
+        <ul class="mt-4 space-y-2.5">
+          <li>
+            <a
+              href="/"
+              class="group inline-flex items-center gap-2 text-sm text-ink-muted transition-colors hover:text-brand-ink"
+            >
+              <span
+                aria-hidden="true"
+                class="font-mono text-2xs text-ink-faint transition-transform duration-300 group-hover:translate-x-0.5"
+                >›</span
+              >
+              Home
+            </a>
+          </li>
+          {
+            navLinks.map((link) => (
+              <li>
+                <a
+                  href={link.href}
+                  class="group inline-flex items-center gap-2 text-sm text-ink-muted transition-colors hover:text-brand-ink"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="font-mono text-2xs text-ink-faint transition-transform duration-300 group-hover:translate-x-0.5"
+                  >
+                    ›
+                  </span>
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <!-- Elsewhere -->
+      <div>
+        <h2 class="font-mono text-2xs uppercase tracking-widest text-ink-faint">
+          // elsewhere
+        </h2>
+        <ul class="mt-4 space-y-2.5">
+          {
+            socials.map(({ label, href, handle, icon }) => (
+              <li>
+                <a
+                  href={href}
+                  target={href.startsWith("http") ? "_blank" : undefined}
+                  rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
+                  class="group inline-flex items-center gap-2 text-sm text-ink-muted transition-colors hover:text-brand-ink"
+                  aria-label={`${label}: ${handle}`}
+                >
+                  <svg
+                    class="size-3.5 shrink-0 text-ink-faint transition-colors group-hover:text-brand-ink"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path fill-rule="evenodd" clip-rule="evenodd" d={icon} />
+                  </svg>
+                  <span class="truncate">{handle}</span>
+                  <span
+                    aria-hidden="true"
+                    class="font-mono text-2xs text-ink-faint opacity-0 transition-opacity group-hover:opacity-100"
+                    >↗</span
+                  >
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+
+    <div
+      class="mt-12 flex flex-col gap-4 border-t border-line pt-6 font-mono text-2xs uppercase tracking-widest text-ink-faint md:flex-row md:items-center md:justify-between"
+    >
+      <p>
+        © {year} {site.name} <span class="mx-1 text-ink-faint/60">·</span> built
+        with <span class="text-ink-muted">astro</span> +
+        <span class="text-ink-muted">tailwind</span>
+      </p>
+
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+        <span class="inline-flex items-center gap-1.5">
+          <span class="text-brand-ink">$</span> echo
+          <span class="normal-case tracking-normal text-ink-muted">{site.node}</span>
+        </span>
+        <span class="hidden h-3 w-px bg-line-strong md:block"></span>
+        <p class="inline-flex items-center gap-1.5">
+          node clock
+          <time
+            data-clock
+            datetime={new Date().toISOString()}
+            class="tabular-nums text-ink-muted">--:--</time
+          >
+        </p>
+        <span class="hidden h-3 w-px bg-line-strong md:block"></span>
+        <a
+          href="#top"
+          class="group inline-flex items-center gap-1.5 transition-colors hover:text-brand-ink"
+        >
+          back to top
+          <span
+            aria-hidden="true"
+            class="transition-transform duration-300 group-hover:-translate-y-0.5"
+            >↑</span
+          >
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Clock: renders in the visitor's own timezone, ticks once a minute.
+  const clock = document.querySelector<HTMLTimeElement>("[data-clock]");
+
+  if (clock) {
+    const formatter = new Intl.DateTimeFormat(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+    const tick = () => {
+      const now = new Date();
+      clock.textContent = formatter.format(now);
+      clock.dateTime = now.toISOString();
+    };
+
+    tick();
+    // Align to the next minute boundary, then tick every 60s.
+    setTimeout(() => {
+      tick();
+      setInterval(tick, 60_000);
+    }, (60 - new Date().getSeconds()) * 1000);
+  }
+</script>

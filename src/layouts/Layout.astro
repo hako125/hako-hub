@@ -34,7 +34,23 @@ const { title = site.title, description = site.description } = Astro.props;
       content="Aditya Alok, Cyber Security, IoT, Machine Learning, Rust, Systems Builder, KIIT, Patna, Software Engineer, Embedded Systems, Defensive Hacking"
     />
     <meta name="author" content={site.name} />
-    <meta name="theme-color" content="#10b981" />
+    <meta name="theme-color" content="#05040a" />
+
+    <!--
+      Resolve the theme before first paint so the page never flashes the wrong
+      palette. Stored choice wins; otherwise follow the OS preference.
+    -->
+    <script is:inline>
+      (() => {
+        const stored = localStorage.getItem("theme");
+        const prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
+        const light = stored ? stored === "light" : prefersLight;
+        document.documentElement.classList.toggle("light", light);
+        document
+          .querySelector('meta[name="theme-color"]')
+          ?.setAttribute("content", light ? "#fdf9ee" : "#05040a");
+      })();
+    </script>
 
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://www.adityaalok.dev/" />
@@ -51,8 +67,44 @@ const { title = site.title, description = site.description } = Astro.props;
     <slot />
 
     <script>
-      // Cursor-following radial glow on the background grid
+      // ----- Theme toggle -----
+      const THEME_KEY = "theme";
       const root = document.documentElement;
+      const meta = document.querySelector('meta[name="theme-color"]');
+
+      const syncToggle = () => {
+        const light = root.classList.contains("light");
+        meta?.setAttribute("content", light ? "#fdf9ee" : "#05040a");
+        document.querySelectorAll<HTMLElement>("[data-theme-toggle]").forEach((btn) => {
+          btn.setAttribute("aria-pressed", String(light));
+          btn.setAttribute(
+            "aria-label",
+            light ? "Switch to dark theme" : "Switch to light theme",
+          );
+        });
+      };
+
+      document.querySelectorAll<HTMLElement>("[data-theme-toggle]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const light = !root.classList.contains("light");
+          root.classList.toggle("light", light);
+          localStorage.setItem(THEME_KEY, light ? "light" : "dark");
+          syncToggle();
+        });
+      });
+
+      // Follow the OS if the visitor has never chosen a theme explicitly.
+      window
+        .matchMedia("(prefers-color-scheme: light)")
+        .addEventListener("change", (event) => {
+          if (localStorage.getItem(THEME_KEY)) return;
+          root.classList.toggle("light", event.matches);
+          syncToggle();
+        });
+
+      syncToggle();
+
+      // Cursor-following radial glow on the background grid
       window.addEventListener("mousemove", (event: MouseEvent) => {
         root.style.setProperty("--mouse-x", `${event.clientX}px`);
         root.style.setProperty("--mouse-y", `${event.clientY}px`);

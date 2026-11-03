@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Theme variant: `light:...` applies only when <html> carries .light. */
+@custom-variant light (&:where(.light, .light *));
+
 :root {
   --mouse-x: 50%;
   --mouse-y: 50%;
@@ -10,14 +13,38 @@
     "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", "Courier New", monospace;
+  /*
+   * Surfaces and ink are semantic tokens wired to the theme below, so every
+   * component stays theme-agnostic: `bg-surface-900`, `text-ink-muted` etc.
+   * resolve to Phoebe's dark palette by default and the light one in `.light`.
+   */
+  --color-surface-950: var(--surface-950);
+  --color-surface-900: var(--surface-900);
+  --color-surface-800: var(--surface-800);
+  --color-surface-700: var(--surface-700);
+  --color-surface-600: var(--surface-600);
+  --color-surface-500: var(--surface-500);
 
-  /* Terminal surface palette */
-  --color-surface-950: #030303;
-  --color-surface-900: #050505;
-  --color-surface-800: #0a0a0a;
-  --color-surface-700: #0f0f0f;
-  --color-surface-600: #111111;
-  --color-surface-500: #121212;
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-glass: var(--glass);
+  --color-glass-hover: var(--glass-hover);
+
+  /* Brand accent: Phoebe's eye purple (dark) / feather yellow (light). */
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-faint: var(--brand-faint);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-contrast: var(--brand-contrast);
+
+  /* Hero chip accents. */
+  --color-tag-a: var(--tag-a);
+  --color-tag-b: var(--tag-b);
+  --color-tag-c: var(--tag-c);
 
   /* Micro typography (below the default text-xs scale) */
   --text-2xs: 0.6875rem;
@@ -28,21 +55,123 @@
   --tracking-brand-wide: 0.3em;
 }
 
+/*
+ * Phoebe theme tokens.
+ *
+ * Dark  : eye purple accent, near-black terminal surfaces.
+ * Light : feather yellow accent, warm paper surfaces.
+ *
+ * The accent trio is (
+ *   brand          solid accent for fills/borders,
+ *   brand-soft     translucent accent for tinted panels,
+ *   brand-faint    barely-there accent for tinted backgrounds,
+ *   brand-ink      accent tuned for text on the surface,
+ *   brand-contrast text/icon colour placed on top of a solid brand fill
+ * ).
+ */
+:root {
+  color-scheme: dark;
+
+  --surface-950: #05040a;
+  --surface-900: #0a0812;
+  --surface-800: #0f0d1a;
+  --surface-700: #151222;
+  --surface-600: #1b1729;
+  --surface-500: #221d33;
+
+  --ink: #f4f1fb;
+  --ink-soft: #cfc9e0;
+  --ink-muted: #9a93b3;
+  --ink-faint: #6f6885;
+  --line: #ffffff14;
+  --line-strong: #ffffff26;
+  /* Frosted-glass fill used by pills and icon buttons. */
+  --glass: #ffffff12;
+  --glass-hover: #ffffff1f;
+  --grain-opacity: 0.02;
+  --grain-blend: normal;
+  /* CRT scanline tint over the terminal panel. */
+  --scanline: #00000040;
+
+  /* Phoebe's eye: violet. */
+  --brand: #9d8df1;
+  --brand-soft: #9d8df133;
+  --brand-faint: #9d8df114;
+  --brand-ink: #b3a5f7;
+  --brand-contrast: #0a0812;
+  --brand-glow: #9d8df140;
+  --brand-grid: #9d8df10d;
+
+  /*
+   * Tag accents for the hero chips. Each is a muted, mid-lightness hue that sits
+   * next to the violet brand without fighting it, and every one is redefined in
+   * `.light` so the chips keep their contrast on paper.
+   */
+  --tag-a: #6fd3c7; /* teal    - coding  */
+  --tag-b: #e08fb0; /* rose    - music   */
+  --tag-c: #e0a56f; /* amber   - games   */
+}
+
+.light {
+  color-scheme: light;
+
+  --surface-950: #fdf9ee;
+  --surface-900: #fbf5e6;
+  --surface-800: #f7efd9;
+  --surface-700: #f2e7c8;
+  --surface-600: #ebdcb4;
+  --surface-500: #e3d1a2;
+
+  --ink: #2c2415;
+  --ink-soft: #4f4430;
+  --ink-muted: #786a4f;
+  --ink-faint: #9c8d6e;
+  --line: #2c241514;
+  --line-strong: #2c241526;
+  /* On paper the glass reads as a light warm tint, not a dark smear. */
+  --glass: #2c241508;
+  --glass-hover: #2c241512;
+  --grain-opacity: 0.035;
+  --grain-blend: multiply;
+  /*
+   * Scanlines would read as grey stripes on paper, so the light theme drops
+   * them to a faint warm tint instead of the heavy dark overlay.
+   */
+  --scanline: #2c24150a;
+
+  /* Phoebe's feather: warm yellow. */
+  --brand: #f0c94a;
+  --brand-soft: #f0c94a4d;
+  --brand-faint: #f0c94a24;
+  --brand-ink: #8a6d12;
+  --brand-contrast: #2c2415;
+  --brand-glow: #f0c94a59;
+  --brand-grid: #c9a52e14;
+
+  /* Darker, slightly desaturated for legibility on warm paper. */
+  --tag-a: #1f7a72;
+  --tag-b: #9c4468;
+  --tag-c: #8f5a1e;
+}
+
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  color: #fff;
-  background-color: var(--color-surface-950);
+  color: var(--ink);
+  background-color: var(--surface-950);
   background-image:
-    radial-gradient(circle at var(--mouse-x) var(--mouse-y), #10b98126 0%, transparent 40%),
-    linear-gradient(#10b98108 1px, transparent 1px),
-    linear-gradient(90deg, #10b98108 1px, transparent 1px);
+    radial-gradient(circle at var(--mouse-x) var(--mouse-y), var(--brand-glow) 0%, transparent 40%),
+    linear-gradient(var(--brand-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--brand-grid) 1px, transparent 1px);
   background-size: 100% 100%, 40px 40px, 40px 40px;
   background-attachment: fixed;
   margin: 0;
   overflow-x: hidden;
+  transition:
+    background-color 0.4s ease,
+    color 0.4s ease;
 }
 
 /* Grain overlay */
@@ -51,7 +180,8 @@ body::before {
   position: fixed;
   inset: 0;
   z-index: 1;
-  opacity: 0.02;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: var(--grain-blend);
   pointer-events: none;
   background-image: url("https://grainy-gradients.vercel.app/noise.svg");
   width: 100%;
@@ -72,19 +202,91 @@ body::before {
   transform: translateY(0);
 }
 
-/* ----- Blinking terminal cursor ----- */
-@keyframes blink {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0;
-  }
+/* ----- Terminal boot log (types out, then wipes away) ----- */
+.term-log {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  transition:
+    opacity 0.4s ease-in,
+    transform 0.4s ease-in,
+    filter 0.4s ease-in;
 }
 
-.term-cursor {
-  animation: blink 1s step-end infinite;
+/* Wipe: the log fades, blurs and lifts as the avatar takes its place. */
+.term-log--out {
+  opacity: 0;
+  filter: blur(4px);
+  transform: translateY(-0.25rem);
+}
+
+/* ----- Pixel avatar (block-glyph image that develops) ----- */
+/*
+ * Sizing never depends on font metrics: the block glyph's advance width differs
+ * between monospace families (0.5em-0.6em), which is what used to squash the
+ * picture. Instead every cell is exactly `100% / cols` wide, so the grid is made
+ * of true squares and always honours the source aspect ratio.
+ *
+ * The square's edge is the smaller of the space available on each axis, applied
+ * to BOTH width and height, so cells stay square however the panel resizes.
+ * `100cqw`/`100cqh` resolve against `.terminal-avatar` (the size container) —
+ * NOT against this element, which must not itself be a size container or the
+ * units would refer to their own box and resolve to nothing.
+ *
+ * Override from anywhere with `--avatar-size` (any length), e.g.
+ * <PixelAvatar style="--avatar-size: 22rem" />.
+ */
+.pixel-avatar {
+  display: flex;
+  flex-direction: column;
+  --edge: min(100cqw, 100cqh);
+  width: var(--avatar-size, var(--edge));
+  height: var(--avatar-size, var(--edge));
+  aspect-ratio: var(--aspect, 1);
+  /*
+   * Match the terminal panel's corners and clip the pixel grid to them, so the
+   * avatar reads as another terminal surface rather than a floating bitmap.
+   */
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  opacity: 0;
+}
+
+/* Provides the size-context the avatar measures itself against. */
+.terminal-avatar {
+  container-type: size;
+}
+
+.pixel-row {
+  display: flex;
+  flex: 1 1 0;
+  min-height: 0;
+}
+.pixel {
+  display: block;
+  flex: 1 1 0;
+  min-width: 0;
+  /*
+   * The cell paints itself instead of relying on the U+2588 block glyph.
+   * A glyph's advance width (0.5-0.6em depending on the monospace family) is
+   * narrower than its cell, which left visible gaps between pixels. A painted
+   * block has no font metrics at all, so neighbouring pixels meet exactly and
+   * the picture reads as a continuous image rather than a dotted grid.
+   */
+  background-color: var(--px, transparent);
+  visibility: hidden;
+  transition: none;
+}
+
+/* Armed: pixels switch on in batches (JS drives visibility), then the grid
+   eases out of greyscale once the last batch has landed. */
+.pixel-avatar.is-armed {
+  opacity: 1;
+  filter: grayscale(1);
+  transition: filter var(--develop, 900ms) ease-out;
+}
+
+.pixel-avatar.is-armed.is-developed {
+  filter: grayscale(0);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -92,5 +294,239 @@ body::before {
     opacity: 1;
     transform: none;
     transition: none;
+  }
+
+  /* Skip the batch reveal: show the finished, full-colour grid. */
+  .pixel-avatar {
+    opacity: 1;
+  }
+
+  .pixel-avatar .pixel {
+    visibility: visible;
+  }
+
+  .pixel-avatar.is-armed {
+    filter: none;
+    transition: none;
+  }
+}
+
+/* ----- Article prose ----- */
+/*
+ * Rendered Markdown has no utility classes, so it needs element-level styling.
+ * Everything reads from the same semantic tokens as the rest of the site, which
+ * keeps light/dark and the accent colour in sync automatically. Scoped to
+ * `.article-prose` so nothing leaks into components that use bare <p>/<ul>.
+ */
+.article-prose {
+  margin-top: 2.5rem;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--ink-soft);
+  overflow-wrap: break-word;
+}
+
+.article-prose > * + * {
+  margin-top: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .article-prose {
+    font-size: 1.0625rem;
+  }
+}
+
+.article-prose h2,
+.article-prose h3,
+.article-prose h4 {
+  color: var(--ink);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  scroll-margin-top: 6rem;
+}
+
+.article-prose h2 {
+  margin-top: 2.75rem;
+  font-size: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.article-prose h2::before {
+  content: "## ";
+  color: var(--brand-ink);
+  font-family: var(--font-mono);
+  font-size: 0.75em;
+  font-weight: 400;
+}
+
+.article-prose h3 {
+  margin-top: 2rem;
+  font-size: 1.1875rem;
+}
+
+.article-prose h4 {
+  margin-top: 1.75rem;
+  font-size: 1rem;
+}
+
+.article-prose p {
+  margin: 0;
+}
+
+.article-prose a {
+  color: var(--brand-ink);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, var(--brand) 45%, transparent);
+  text-underline-offset: 0.2em;
+  transition: text-decoration-color 0.2s ease;
+}
+
+.article-prose a:hover {
+  text-decoration-color: var(--brand);
+}
+
+.article-prose strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.article-prose em {
+  color: var(--ink);
+}
+
+.article-prose ul,
+.article-prose ol {
+  padding-left: 1.5rem;
+}
+
+.article-prose ul {
+  list-style: none;
+}
+
+.article-prose ul > li {
+  position: relative;
+  padding-left: 1rem;
+}
+
+.article-prose ul > li + li,
+.article-prose ol > li + li {
+  margin-top: 0.5rem;
+}
+
+/* Terminal-style bullet keeps the site's voice in long-form text. */
+.article-prose ul > li::before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  color: var(--brand-ink);
+}
+
+.article-prose ol {
+  list-style: decimal;
+}
+
+.article-prose ol > li::marker {
+  color: var(--brand-ink);
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+}
+
+.article-prose blockquote {
+  margin: 1.75rem 0;
+  padding: 0.25rem 0 0.25rem 1.25rem;
+  border-left: 2px solid var(--brand);
+  color: var(--ink);
+  font-style: italic;
+}
+
+.article-prose blockquote p + p {
+  margin-top: 0.75rem;
+}
+
+.article-prose code {
+  font-family: var(--font-mono);
+  font-variant-ligatures: none;
+  /* Keep plain ASCII in code from being upgraded to colour emoji glyphs. */
+  font-variant-emoji: text;
+  font-size: 0.875em;
+  padding: 0.15em 0.4em;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background-color: var(--surface-800);
+  color: var(--brand-ink);
+}
+
+.article-prose pre {
+  overflow-x: auto;
+  font-variant-ligatures: none;
+  font-variant-emoji: text;
+  padding: 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background-color: var(--surface-900);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  tab-size: 2;
+}
+
+.article-prose pre code {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: inherit;
+}
+
+.article-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  display: block;
+  overflow-x: auto;
+}
+
+.article-prose thead th {
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  border-bottom: 1px solid var(--line-strong);
+  padding: 0.5rem 0.75rem;
+}
+
+.article-prose tbody td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+.article-prose tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.article-prose hr {
+  margin: 2.5rem 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+.article-prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line);
+}
+
+.article-prose :is(h2, h3, h4):target {
+  color: var(--brand-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 }

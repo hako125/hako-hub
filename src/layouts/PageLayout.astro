@@ -1,0 +1,133 @@
+---
+import "../styles/global.css";
+import Navbar from "../components/Navbar.astro";
+import Footer from "../components/Footer.astro";
+import { site } from "../data/site";
+
+interface Props {
+  title: string;
+  description: string;
+  /** og:type override — articles use "article". */
+  type?: "website" | "article";
+}
+
+const { title, description, type = "website" } = Astro.props;
+
+// Canonical URLs are built from the request path so sub-pages stay accurate.
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
+const pageTitle = `${title} · ${site.title}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/programming.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{pageTitle}</title>
+    <meta name="title" content={pageTitle} />
+    <meta name="description" content={description} />
+    <meta name="author" content={site.name} />
+    <meta name="theme-color" content="#05040a" />
+    <link rel="canonical" href={canonical} />
+
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:image" content="/og-image.png" />
+    <meta property="twitter:title" content={pageTitle} />
+    <meta property="twitter:description" content={description} />
+
+    <script is:inline>
+      (() => {
+        const stored = localStorage.getItem("theme");
+        const prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
+        const light = stored ? stored === "light" : prefersLight;
+        document.documentElement.classList.toggle("light", light);
+        document
+          .querySelector('meta[name="theme-color"]')
+          ?.setAttribute("content", light ? "#fdf9ee" : "#05040a");
+      })();
+    </script>
+
+    <slot name="head" />
+  </head>
+  <body>
+    <div class="relative z-10 min-h-screen bg-transparent pt-20 text-ink">
+      <Navbar />
+      <slot />
+      <Footer />
+    </div>
+
+    <script>
+      // Same theme behaviour as the home layout: toggle + OS follow + scroll reveal.
+      const THEME_KEY = "theme";
+      const root = document.documentElement;
+      const meta = document.querySelector('meta[name="theme-color"]');
+
+      const syncToggle = () => {
+        const light = root.classList.contains("light");
+        meta?.setAttribute("content", light ? "#fdf9ee" : "#05040a");
+        document.querySelectorAll<HTMLElement>("[data-theme-toggle]").forEach((btn) => {
+          btn.setAttribute("aria-pressed", String(light));
+          btn.setAttribute(
+            "aria-label",
+            light ? "Switch to dark theme" : "Switch to light theme",
+          );
+        });
+      };
+
+      document.querySelectorAll<HTMLElement>("[data-theme-toggle]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const light = !root.classList.contains("light");
+          root.classList.toggle("light", light);
+          localStorage.setItem(THEME_KEY, light ? "light" : "dark");
+          syncToggle();
+        });
+      });
+
+      window
+        .matchMedia("(prefers-color-scheme: light)")
+        .addEventListener("change", (event) => {
+          if (localStorage.getItem(THEME_KEY)) return;
+          root.classList.toggle("light", event.matches);
+          syncToggle();
+        });
+
+      syncToggle();
+
+      window.addEventListener("mousemove", (event: MouseEvent) => {
+        root.style.setProperty("--mouse-x", `${event.clientX}px`);
+        root.style.setProperty("--mouse-y", `${event.clientY}px`);
+      });
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+              observer.unobserve(entry.target);
+            }
+          }
+        },
+        { rootMargin: "-100px" },
+      );
+
+      document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
+    </script>
+  </body>
+</html>

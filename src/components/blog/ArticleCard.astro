@@ -1,0 +1,92 @@
+---
+import { accentClasses, formatDate, isoDate, readMinutes, type Article } from "../../lib/blog";
+
+interface Props {
+  article: Article;
+  /** Category object resolved by the page (references are not populated automatically). */
+  categoryName?: string;
+  categoryAccent?: keyof typeof accentClasses;
+  /** Larger variant for the first item in a listing. */
+  featured?: boolean;
+}
+
+const {
+  article,
+  categoryName,
+  categoryAccent = "brand",
+  featured = false,
+} = Astro.props;
+
+const { data } = article;
+const accent = accentClasses[categoryAccent];
+---
+
+<article
+  class:list={[
+    "group relative flex h-full flex-col overflow-hidden rounded-lg border border-line bg-surface-900 p-6 shadow-lg transition-all duration-300 md:p-8",
+    accent.hover,
+    "hover:shadow-[0_0_20px_var(--brand)]/10",
+    featured && "md:p-10",
+  ]}
+>
+  <div
+    class:list={[
+      "absolute inset-x-0 top-0 h-0.5 bg-linear-to-r from-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100",
+      categoryAccent === "brand" ? "via-brand" : "via-line-strong",
+    ]}
+  >
+  </div>
+
+  <div class="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-2xs uppercase tracking-widest">
+    <a
+      href={`/categories/${article.data.category.id}`}
+      class:list={[
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 transition-colors",
+        accent.border,
+        accent.bg,
+        accent.text,
+      ]}
+    >
+      <span class:list={["size-1.5 rounded-full", accent.dot]} />
+      {categoryName ?? article.data.category.id}
+    </a>
+    <span class="text-ink-faint">·</span>
+    <time datetime={isoDate(data.pubDate)} class="text-ink-muted">
+      {formatDate(data.pubDate)}
+    </time>
+    <span class="text-ink-faint">·</span>
+    <span class="text-ink-muted">{readMinutes(article)} min read</span>
+  </div>
+
+  <h2
+    class:list={[
+      "font-bold tracking-tight text-ink transition-colors duration-300 group-hover:text-brand-ink",
+      featured ? "text-2xl md:text-3xl" : "text-xl md:text-2xl",
+    ]}
+  >
+    <a href={`/articles/${article.id}`} class="after:absolute after:inset-0">
+      {data.title}
+    </a>
+  </h2>
+
+  <p
+    class:list={[
+      "mt-3 grow leading-relaxed text-ink-muted",
+      featured ? "text-base md:text-lg" : "text-sm md:text-base",
+    ]}
+  >
+    {data.description}
+  </p>
+
+  {
+    data.tags.length > 0 && (
+      <ul class="mt-6 flex flex-wrap gap-2 border-t border-line pt-4">
+        {data.tags.map((tag) => (
+          <li class="rounded border border-line bg-surface-600 px-2 py-1 font-mono text-2xs text-ink-muted">
+            #{tag}
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</article>

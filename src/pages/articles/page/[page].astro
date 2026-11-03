@@ -1,0 +1,77 @@
+---
+import type { GetStaticPaths } from "astro";
+import PageLayout from "../../../layouts/PageLayout.astro";
+import SectionHeader from "../../../components/SectionHeader.astro";
+import ArticleCard from "../../../components/blog/ArticleCard.astro";
+import Pagination from "../../../components/blog/Pagination.astro";
+import {
+  ARTICLES_PER_PAGE,
+  getArticles,
+  getCategoriesWithCounts,
+  paginate,
+} from "../../../lib/blog";
+
+/**
+ * Pages 2..N of the listing. Page 1 lives at /articles/index.astro, so the
+ * range starts at 2 to avoid two routes rendering the same content.
+ */
+export const getStaticPaths: GetStaticPaths = async () => {
+  const articles = await getArticles();
+  const totalPages = Math.max(1, Math.ceil(articles.length / ARTICLES_PER_PAGE));
+
+  return Array.from({ length: Math.max(0, totalPages - 1) }, (_, index) => ({
+    params: { page: String(index + 2) },
+  }));
+};
+
+const currentPage = Number(Astro.params.page);
+const articles = await getArticles();
+const categories = await getCategoriesWithCounts();
+const { items, page, totalPages } = paginate(articles, currentPage, ARTICLES_PER_PAGE);
+
+const categoryName = (id: string) =>
+  categories.find((entry) => entry.category.id === id)?.category.data.name ?? id;
+const categoryAccent = (id: string) =>
+  categories.find((entry) => entry.category.id === id)?.category.data.accent ?? "brand";
+---
+
+<PageLayout
+  title={`Articles — page ${page}`}
+  description="Long-form notes on systems programming, security engineering, and shipping machine learning."
+>
+  <main class="mx-auto max-w-[90%] px-6 pb-24 2xl:max-w-350">
+    <header class="reveal py-12 md:py-16">
+      <a
+        href="/articles"
+        class="inline-flex items-center gap-2 font-mono text-2xs uppercase tracking-widest text-ink-faint transition-colors hover:text-brand-ink"
+      >
+        <span aria-hidden="true">←</span> back to page 1
+      </a>
+      <div class="mt-6">
+        <SectionHeader
+          command={`articles --page=${page}`}
+          subtitle={`// showing entries ${(page - 1) * ARTICLES_PER_PAGE + 1}–${Math.min(
+            page * ARTICLES_PER_PAGE,
+            articles.length,
+          )} of ${articles.length}`}
+        />
+      </div>
+    </header>
+
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
+      {
+        items.map((article) => (
+          <div class="reveal">
+            <ArticleCard
+              article={article}
+              categoryName={categoryName(article.data.category.id)}
+              categoryAccent={categoryAccent(article.data.category.id)}
+            />
+          </div>
+        ))
+      }
+    </div>
+
+    <Pagination page={page} totalPages={totalPages} basePath="/articles" />
+  </main>
+</PageLayout>

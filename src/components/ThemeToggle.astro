@@ -1,0 +1,58 @@
+---
+/**
+ * Theme toggle.
+ *
+ * The icon state is driven by CSS, not by JS: `dark:` variants react to the
+ * `.light` class on <html>. That keeps the button correct on first paint
+ * (before hydration) and avoids any icon flicker when toggling.
+ *
+ * The click behaviour lives in Layout.astro and targets `[data-theme-toggle]`.
+ */
+interface Props {
+  class?: string;
+}
+
+const { class: className = "" } = Astro.props;
+---
+
+<button
+  type="button"
+  data-theme-toggle
+  aria-pressed="false"
+  aria-label="Switch to light theme"
+  title="Toggle theme"
+  class:list={[
+    "flex size-10 shrink-0 items-center justify-center rounded-full border border-line bg-glass text-ink/80 backdrop-blur-sm backdrop-brightness-[1.4] light:backdrop-brightness-100 transition-all duration-300 hover:text-ink hover:bg-glass-hover",
+    className,
+  ]}
+>
+  <!-- Sun: shown in the light theme. -->
+  <svg
+    class="hidden size-4.5 light:block"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    stroke-width="2"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="4"></circle>
+    <path
+      stroke-linecap="round"
+      d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+    ></path>
+  </svg>
+  <!-- Moon: shown in the dark theme. -->
+  <svg
+    class="size-4.5 light:hidden"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    stroke-width="2"
+    aria-hidden="true"
+  >
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path>
+  </svg>
+</button>

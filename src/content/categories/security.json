@@ -1,0 +1,7 @@
+{
+  "name": "Security",
+  "abbr": "SEC",
+  "description": "Offensive and defensive security notes — packet analysis, threat models, and the odd CTF writeup.",
+  "accent": "brand",
+  "order": 10
+}

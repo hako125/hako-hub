@@ -1,0 +1,142 @@
+---
+import PageLayout from "../../layouts/PageLayout.astro";
+import SectionHeader from "../../components/SectionHeader.astro";
+import ArticleCard from "../../components/blog/ArticleCard.astro";
+import CategoryChip from "../../components/blog/CategoryChip.astro";
+import Pagination from "../../components/blog/Pagination.astro";
+import {
+  ARTICLES_PER_PAGE,
+  collectTags,
+  formatDate,
+  getArticles,
+  getCategoriesWithCounts,
+  paginate,
+  readMinutes,
+} from "../../lib/blog";
+
+const articles = await getArticles();
+const categories = await getCategoriesWithCounts();
+const tags = collectTags(articles);
+
+const { items, page, totalPages } = paginate(articles, 1, ARTICLES_PER_PAGE);
+
+// Quick stats for the header strip.
+const totalWords = articles.reduce(
+  (sum, article) => sum + readMinutes(article),
+  0,
+);
+const latest = articles[0];
+
+const categoryName = (id: string) =>
+  categories.find((entry) => entry.category.id === id)?.category.data.name ?? id;
+const categoryAccent = (id: string) =>
+  categories.find((entry) => entry.category.id === id)?.category.data.accent ?? "brand";
+---
+
+<PageLayout
+  title="Articles"
+  description="Long-form notes on systems programming, security engineering, and shipping machine learning."
+>
+  <main class="mx-auto max-w-[90%] px-6 pb-24 2xl:max-w-350">
+    <header class="reveal py-12 md:py-16">
+      <div
+        class="mb-6 inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand-soft px-3 py-1"
+      >
+        <span class="size-2 animate-pulse rounded-full bg-brand"></span>
+        <p class="font-mono text-2xs uppercase tracking-widest text-brand-ink">
+          archive.index: {articles.length} entries
+        </p>
+      </div>
+
+      <SectionHeader
+        command="articles"
+        subtitle="// long-form notes, debug logs, and things I had to learn the hard way"
+      />
+
+      <dl
+        class="mt-8 grid grid-cols-2 gap-4 border-y border-line py-5 font-mono text-2xs uppercase tracking-widest md:grid-cols-4"
+      >
+        <div>
+          <dt class="text-ink-faint">entries</dt>
+          <dd class="mt-1 text-lg text-ink tabular-nums">{articles.length}</dd>
+        </div>
+        <div>
+          <dt class="text-ink-faint">categories</dt>
+          <dd class="mt-1 text-lg text-ink tabular-nums">{categories.length}</dd>
+        </div>
+        <div>
+          <dt class="text-ink-faint">read time</dt>
+          <dd class="mt-1 text-lg text-ink tabular-nums">{totalWords} min</dd>
+        </div>
+        <div>
+          <dt class="text-ink-faint">latest</dt>
+          <dd class="mt-1 text-lg text-ink">{latest ? formatDate(latest.data.pubDate) : "—"}</dd>
+        </div>
+      </dl>
+
+      {
+        categories.some((entry) => entry.articles.length > 0) && (
+          <nav aria-label="Filter by category" class="mt-6 flex flex-wrap gap-2">
+            <CategoryChip name="all" count={articles.length} href="/articles" active />
+            {categories
+              .filter((entry) => entry.articles.length > 0)
+              .map((entry) => (
+                <CategoryChip
+                  name={entry.category.data.name}
+                  accent={entry.category.data.accent}
+                  count={entry.articles.length}
+                  href={`/categories/${entry.category.id}`}
+                />
+              ))}
+          </nav>
+        )
+      }
+    </header>
+
+    {
+      items.length === 0 ? (
+        <p class="rounded-lg border border-dashed border-line bg-surface-900 p-10 text-center font-mono text-sm text-ink-muted">
+          // no articles published yet — check back soon
+        </p>
+      ) : (
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
+          {items.map((article, index) => (
+            <div
+              class:list={[
+                "reveal",
+                index === 0 && page === 1 && "lg:col-span-2",
+              ]}
+            >
+              <ArticleCard
+                article={article}
+                categoryName={categoryName(article.data.category.id)}
+                categoryAccent={categoryAccent(article.data.category.id)}
+                featured={index === 0 && page === 1}
+              />
+            </div>
+          ))}
+        </div>
+      )
+    }
+
+    <Pagination page={page} totalPages={totalPages} basePath="/articles" />
+
+    {
+      tags.length > 0 && (
+        <section class="mt-16 border-t border-line pt-8">
+          <h2 class="font-mono text-2xs uppercase tracking-widest text-ink-faint">
+            tags
+          </h2>
+          <ul class="mt-4 flex flex-wrap gap-2">
+            {tags.map(({ tag, count }) => (
+              <li class="inline-flex items-center gap-2 rounded-full border border-line bg-glass px-3 py-1.5 font-mono text-2xs text-ink-muted">
+                #{tag}
+                <span class="text-ink-faint">{count}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </main>
+</PageLayout>

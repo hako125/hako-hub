@@ -1,0 +1,243 @@
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
+import { render } from "astro:content";
+import PageLayout from "../../layouts/PageLayout.astro";
+import CategoryChip from "../../components/blog/CategoryChip.astro";
+import {
+  accentClasses,
+  formatDate,
+  getArticles,
+  getCategoryMap,
+  getSiblings,
+  isoDate,
+  readMinutes,
+  type Article,
+} from "../../lib/blog";
+
+interface Props {
+  article: Article;
+}
+
+export const getStaticPaths = (async () => {
+  const articles = await getArticles();
+  return articles.map((article) => ({
+    params: { slug: article.id },
+    props: { article },
+  }));
+}) satisfies GetStaticPaths;
+
+type PropsFromPaths = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { article }: Props = Astro.props as PropsFromPaths;
+const { Content, headings } = await render(article);
+
+const articles = await getArticles();
+const categoryMap = await getCategoryMap();
+const category = categoryMap.get(article.data.category.id);
+const tone = accentClasses[category?.data.accent ?? "brand"];
+const { newer, older } = getSiblings(article, articles);
+
+// Only surface h2/h3 in the table of contents, and only if there are enough.
+const toc = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+
+const related = articles
+  .filter(
+    (entry) =>
+      entry.id !== article.id &&
+      (entry.data.category.id === article.data.category.id ||
+        entry.data.tags.some((tag) => article.data.tags.includes(tag))),
+  )
+  .slice(0, 2);
+---
+
+<PageLayout
+  title={article.data.title}
+  description={article.data.description}
+  type="article"
+>
+  <script
+    slot="head"
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      headline: article.data.title,
+      description: article.data.description,
+      datePublished: article.data.pubDate.toISOString(),
+      dateModified: (article.data.updatedDate ?? article.data.pubDate).toISOString(),
+      author: { "@type": "Person", name: "Hako" },
+    })}
+  />
+
+  <main class="mx-auto max-w-[90%] px-6 pb-24 2xl:max-w-350">
+    <div class="grid grid-cols-1 gap-10 pt-12 lg:grid-cols-[minmax(0,1fr)_16rem] lg:gap-16">
+      <article>
+        <header class="reveal border-b border-line pb-8">
+          <a
+            href="/articles"
+            class="inline-flex items-center gap-2 font-mono text-2xs uppercase tracking-widest text-ink-faint transition-colors hover:text-brand-ink"
+          >
+            <span aria-hidden="true">←</span> all articles
+          </a>
+
+          <div class="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2">
+            {
+              category && (
+                <CategoryChip
+                  name={category.data.name}
+                  accent={category.data.accent}
+                  href={`/categories/${category.id}`}
+                />
+              )
+            }
+            <span class="font-mono text-2xs uppercase tracking-widest text-ink-faint">
+              <time datetime={isoDate(article.data.pubDate)}>
+                {formatDate(article.data.pubDate)}
+              </time>
+              <span class="mx-1.5">·</span>
+              {readMinutes(article)} min read
+            </span>
+          </div>
+
+          <h1 class="mt-5 text-3xl font-bold tracking-tight text-ink md:text-5xl">
+            {article.data.title}
+          </h1>
+          <p class="mt-4 text-base leading-relaxed text-ink-muted md:text-lg">
+            {article.data.description}
+          </p>
+
+          {
+            article.data.updatedDate && (
+              <p class="mt-4 font-mono text-2xs uppercase tracking-widest text-ink-faint">
+                last revised {formatDate(article.data.updatedDate)}
+              </p>
+            )
+          }
+        </header>
+
+        <div class="article-prose reveal">
+          <Content />
+        </div>
+
+        {
+          article.data.tags.length > 0 && (
+            <ul class="mt-10 flex flex-wrap gap-2 border-t border-line pt-6">
+              {article.data.tags.map((tag) => (
+                <li class="rounded border border-line bg-surface-600 px-2.5 py-1 font-mono text-2xs text-ink-muted">
+                  #{tag}
+                </li>
+              ))}
+            </ul>
+          )
+        }
+
+        <nav
+          aria-label="Adjacent articles"
+          class="mt-10 grid grid-cols-1 gap-4 border-t border-line pt-8 sm:grid-cols-2"
+        >
+          {
+            older ? (
+              <a
+                href={`/articles/${older.id}`}
+                rel="prev"
+                class="group rounded-lg border border-line bg-surface-900 p-5 transition-colors hover:border-brand/50"
+              >
+                <span class="font-mono text-2xs uppercase tracking-widest text-ink-faint">
+                  ← older
+                </span>
+                <p class="mt-2 font-semibold text-ink transition-colors group-hover:text-brand-ink">
+                  {older.data.title}
+                </p>
+              </a>
+            ) : (
+              <div />
+            )
+          }
+          {
+            newer ? (
+              <a
+                href={`/articles/${newer.id}`}
+                rel="next"
+                class="group rounded-lg border border-line bg-surface-900 p-5 text-right transition-colors hover:border-brand/50"
+              >
+                <span class="font-mono text-2xs uppercase tracking-widest text-ink-faint">
+                  newer →
+                </span>
+                <p class="mt-2 font-semibold text-ink transition-colors group-hover:text-brand-ink">
+                  {newer.data.title}
+                </p>
+              </a>
+            ) : (
+              <div />
+            )
+          }
+        </nav>
+      </article>
+
+      <aside class="hidden lg:block">
+        <div class="sticky top-28 space-y-8">
+          {
+            toc.length > 1 && (
+              <nav aria-label="Table of contents">
+                <p class="font-mono text-2xs uppercase tracking-widest text-ink-faint">
+                  // on this page
+                </p>
+                <ul class="mt-4 space-y-2 border-l border-line">
+                  {toc.map((heading) => (
+                    <li>
+                      <a
+                        href={`#${heading.slug}`}
+                        class:list={[
+                          "block border-l-2 border-transparent py-0.5 text-sm text-ink-muted transition-colors hover:border-brand hover:text-ink",
+                          heading.depth === 2 ? "-ml-0.5 pl-3" : "-ml-0.5 pl-6 text-2xs",
+                        ]}
+                      >
+                        {heading.text}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            )
+          }
+
+          {
+            related.length > 0 && (
+              <div>
+                <p class="font-mono text-2xs uppercase tracking-widest text-ink-faint">
+                  // related
+                </p>
+                <ul class="mt-4 space-y-4">
+                  {related.map((entry) => (
+                    <li>
+                      <a
+                        href={`/articles/${entry.id}`}
+                        class="group block rounded-md border border-line bg-surface-900 p-4 transition-colors hover:border-brand/50"
+                      >
+                        <p class="text-sm font-semibold leading-snug text-ink transition-colors group-hover:text-brand-ink">
+                          {entry.data.title}
+                        </p>
+                        <p class="mt-1.5 font-mono text-2xs uppercase tracking-widest text-ink-faint">
+                          {formatDate(entry.data.pubDate)}
+                        </p>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )
+          }
+
+          <div class:list={["rounded-md border p-4", tone.border, tone.bg]}>
+            <p class:list={["font-mono text-2xs uppercase tracking-widest", tone.text]}>
+              // file
+            </p>
+            <p class="mt-2 break-all font-mono text-2xs text-ink-muted">
+              src/content/articles/{article.id}.md
+            </p>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+</PageLayout>

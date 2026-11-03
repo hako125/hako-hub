@@ -1,0 +1,113 @@
+---
+import PageLayout from "../../layouts/PageLayout.astro";
+import SectionHeader from "../../components/SectionHeader.astro";
+import CategoryCard from "../../components/blog/CategoryCard.astro";
+import CategoryChip from "../../components/blog/CategoryChip.astro";
+import { collectTags, getArticles, getCategoriesWithCounts } from "../../lib/blog";
+
+const categories = await getCategoriesWithCounts();
+const articles = await getArticles();
+const tags = collectTags(articles);
+
+const totalArticles = articles.length;
+const categoryCount = categories.length;
+const emptyCount = categories.filter((entry) => entry.articles.length === 0).length;
+const busiest = [...categories].sort(
+  (a, b) => b.articles.length - a.articles.length,
+)[0];
+---
+
+<PageLayout
+  title="Categories"
+  description="Every topic on the blog — security, systems, machine learning, and the homelab that runs it all."
+>
+  <main class="mx-auto max-w-[90%] px-6 pb-24 2xl:max-w-350">
+    <header class="reveal py-12 md:py-16">
+      <div
+        class="mb-6 inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand-soft px-3 py-1"
+      >
+        <span class="size-2 animate-pulse rounded-full bg-brand"></span>
+        <p class="font-mono text-2xs uppercase tracking-widest text-brand-ink">
+          archive.categories: indexed
+        </p>
+      </div>
+
+      <SectionHeader
+        command="categories"
+        subtitle="// topics I keep writing about, grouped so you can ignore the ones you don't care about"
+      />
+
+      <dl
+        class="mt-8 grid grid-cols-2 gap-4 border-y border-line py-5 font-mono text-2xs uppercase tracking-widest md:grid-cols-4"
+      >
+        <div>
+          <dt class="text-ink-faint">categories</dt>
+          <dd class="mt-1 text-lg text-ink tabular-nums">{categoryCount}</dd>
+        </div>
+        <div>
+          <dt class="text-ink-faint">articles</dt>
+          <dd class="mt-1 text-lg text-ink tabular-nums">{totalArticles}</dd>
+        </div>
+        <div>
+          <dt class="text-ink-faint">busiest</dt>
+          <dd class="mt-1 text-lg text-ink">
+            {busiest && busiest.articles.length > 0 ? busiest.category.data.name : "—"}
+          </dd>
+        </div>
+        <div>
+          <dt class="text-ink-faint">empty</dt>
+          <dd class="mt-1 text-lg text-ink tabular-nums">{emptyCount}</dd>
+        </div>
+      </dl>
+    </header>
+
+    <section aria-label="All categories">
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:gap-8">
+        {
+          categories.map((entry) => (
+            <div class="reveal">
+              <CategoryCard category={entry.category} articles={entry.articles} />
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    {
+      tags.length > 0 && (
+        <section class="mt-16 border-t border-line pt-8">
+          <h2 class="font-mono text-2xs uppercase tracking-widest text-ink-faint">
+            tags across every category
+          </h2>
+          <ul class="mt-4 flex flex-wrap gap-2">
+            {tags.map(({ tag, count }) => (
+              <li class="inline-flex items-center gap-2 rounded-full border border-line bg-glass px-3 py-1.5 font-mono text-2xs text-ink-muted">
+                #{tag}
+                <span class="text-ink-faint">{count}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <aside class="mt-16 rounded-lg border border-line bg-surface-900 p-6 md:p-8">
+      <h2 class="font-mono text-2xs uppercase tracking-widest text-ink-faint">
+        // shortcuts
+      </h2>
+      <div class="mt-4 flex flex-wrap gap-2">
+        <CategoryChip name="all articles" count={totalArticles} href="/articles" />
+        {
+          categories.slice(0, 4).map((entry) => (
+            <CategoryChip
+              name={entry.category.data.name}
+              accent={entry.category.data.accent}
+              count={entry.articles.length}
+              href={`/categories/${entry.category.id}`}
+            />
+          ))
+        }
+      </div>
+    </aside>
+  </main>
+</PageLayout>

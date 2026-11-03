@@ -1,0 +1,179 @@
+---
+import type { GetStaticPaths } from "astro";
+import PageLayout from "../../layouts/PageLayout.astro";
+import SectionHeader from "../../components/SectionHeader.astro";
+import ArticleCard from "../../components/blog/ArticleCard.astro";
+import CategoryChip from "../../components/blog/CategoryChip.astro";
+import {
+  accentClasses,
+  collectTags,
+  formatDate,
+  getArticles,
+  getCategoriesWithCounts,
+  readMinutes,
+  type Category,
+} from "../../lib/blog";
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const categories = await getCategoriesWithCounts();
+  return categories.map((entry) => ({
+    params: { slug: entry.category.id },
+    props: { category: entry.category, articles: entry.articles },
+  }));
+};
+
+interface Props {
+  category: Category;
+  articles: Awaited<ReturnType<typeof getArticles>>;
+}
+
+const { category, articles } = Astro.props;
+const tone = accentClasses[category.data.accent];
+
+const all = await getCategoriesWithCounts();
+const tags = collectTags(articles);
+const totalMinutes = articles.reduce((sum, article) => sum + readMinutes(article), 0);
+const latest = articles[0];
+
+// Neighbouring categories for the footer switcher.
+const index = all.findIndex((entry) => entry.category.id === category.id);
+const previous = index > 0 ? all[index - 1] : all[all.length - 1];
+const next = index < all.length - 1 ? all[index + 1] : all[0];
+const siblings = all.filter((entry) => entry.category.id !== category.id);
+---
+
+<PageLayout
+  title={`${category.data.name} · Categories`}
+  description={category.data.description}
+>
+  <main class="mx-auto max-w-[90%] px-6 pb-24 2xl:max-w-350">
+    <header class="reveal py-12 md:py-16">
+      <a
+        href="/categories"
+        class="inline-flex items-center gap-2 font-mono text-2xs uppercase tracking-widest text-ink-faint transition-colors hover:text-brand-ink"
+      >
+        <span aria-hidden="true">←</span> all categories
+      </a>
+
+      <div class="mt-6 flex flex-wrap items-center gap-3">
+        <span
+          class:list={[
+            "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-2xs uppercase tracking-widest",
+            tone.border,
+            tone.bg,
+            tone.text,
+          ]}
+        >
+          <span class:list={["size-1.5 rounded-full", tone.dot]} />
+          {category.data.abbr ?? category.id}
+        </span>
+        <span class="font-mono text-2xs uppercase tracking-widest text-ink-faint">
+          {articles.length} {articles.length === 1 ? "article" : "articles"}
+          <span class="mx-1.5">·</span>
+          {totalMinutes} min total
+          {
+            latest && (
+              <>
+                <span class="mx-1.5">·</span>
+                updated {formatDate(latest.data.pubDate)}
+              </>
+            )
+          }
+        </span>
+      </div>
+
+      <div class="mt-6">
+        <SectionHeader
+          command={`categories/${category.id}`}
+          subtitle={category.data.description}
+        />
+      </div>
+    </header>
+
+    {
+      articles.length === 0 ? (
+        <div class="rounded-lg border border-dashed border-line bg-surface-900 p-10 text-center">
+          <p class="font-mono text-sm text-ink-muted">
+            // nothing filed under {category.data.name} yet
+          </p>
+          <a
+            href="/articles"
+            class="mt-4 inline-flex items-center gap-2 font-mono text-2xs uppercase tracking-widest text-brand-ink transition-colors hover:text-ink"
+          >
+            browse all articles <span aria-hidden="true">→</span>
+          </a>
+        </div>
+      ) : (
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
+          {articles.map((article) => (
+            <div class="reveal">
+              <ArticleCard
+                article={article}
+                categoryName={category.data.name}
+                categoryAccent={category.data.accent}
+              />
+            </div>
+          ))}
+        </div>
+      )
+    }
+
+    {
+      tags.length > 0 && (
+        <section class="mt-12 border-t border-line pt-8">
+          <h2 class="font-mono text-2xs uppercase tracking-widest text-ink-faint">
+            tags in this category
+          </h2>
+          <ul class="mt-4 flex flex-wrap gap-2">
+            {tags.map(({ tag, count }) => (
+              <li class="inline-flex items-center gap-2 rounded-full border border-line bg-glass px-3 py-1.5 font-mono text-2xs text-ink-muted">
+                #{tag}
+                <span class="text-ink-faint">{count}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <nav
+      aria-label="Other categories"
+      class="mt-12 grid grid-cols-1 gap-4 border-t border-line pt-8 sm:grid-cols-2"
+    >
+      <a
+        href={`/categories/${previous.category.id}`}
+        class="group rounded-lg border border-line bg-surface-900 p-5 transition-colors hover:border-brand/50"
+      >
+        <span class="font-mono text-2xs uppercase tracking-widest text-ink-faint">
+          ← {previous.category.data.name}
+        </span>
+        <p class="mt-2 text-sm text-ink-muted">
+          {previous.articles.length} articles
+        </p>
+      </a>
+      <a
+        href={`/categories/${next.category.id}`}
+        class="group rounded-lg border border-line bg-surface-900 p-5 text-right transition-colors hover:border-brand/50"
+      >
+        <span class="font-mono text-2xs uppercase tracking-widest text-ink-faint">
+          {next.category.data.name} →
+        </span>
+        <p class="mt-2 text-sm text-ink-muted">{next.articles.length} articles</p>
+      </a>
+    </nav>
+
+    <div class="mt-8 flex flex-wrap gap-2">
+      <CategoryChip name="all articles" href="/articles" />
+      {
+        siblings.map((entry) => (
+          <CategoryChip
+            name={entry.category.data.name}
+            accent={entry.category.data.accent}
+            count={entry.articles.length}
+            href={`/categories/${entry.category.id}`}
+          />
+        ))
+      }
+    </div>
+  </main>
+</PageLayout>

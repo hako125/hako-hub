@@ -1,0 +1,7 @@
+{
+  "name": "Homelab",
+  "abbr": "LAB",
+  "description": "Proxmox, TrueNAS, self-hosted services, and the wiring that keeps the rack alive at 3am.",
+  "accent": "tag-c",
+  "order": 40
+}

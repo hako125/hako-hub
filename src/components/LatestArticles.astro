@@ -1,0 +1,117 @@
+---
+import SectionWrapper from "./SectionWrapper.astro";
+import SectionHeader from "./SectionHeader.astro";
+import { accentClasses, formatDate, getArticles, getCategoryMap, isoDate, readMinutes } from "../lib/blog";
+
+/** Number of posts surfaced on the landing page. */
+const LIMIT = 4;
+
+const all = await getArticles();
+const articles = all.slice(0, LIMIT);
+const categoryMap = await getCategoryMap();
+
+const plural = (n: number) => (n === 1 ? "article" : "articles");
+const pad = (n: number) => String(n).padStart(2, "0");
+---
+
+<SectionWrapper id="latest" class="border-t border-line">
+  <div
+    slot="header"
+    class="flex flex-col justify-between gap-8 md:flex-row md:items-end"
+  >
+    <SectionHeader
+      command="Latest Articles"
+      subtitle={`// dididi...found ${articles.length} latest ${plural(articles.length)}`}
+    />
+
+    <a
+      href="/articles"
+      class="group inline-flex shrink-0 items-center gap-2 rounded-full border border-line bg-glass px-5 py-2 font-mono text-2xs font-medium uppercase tracking-widest text-ink-muted transition-colors hover:border-brand/50 hover:text-brand-ink"
+    >
+      view archive
+      <span aria-hidden="true" class="transition-transform duration-300 group-hover:translate-x-1">
+        →
+      </span>
+    </a>
+  </div>
+
+  {
+    articles.length === 0 ? (
+      <p class="mt-4 rounded-lg border border-dashed border-line bg-surface-900 p-8 text-center font-mono text-sm text-ink-muted">
+        // no articles published yet
+      </p>
+    ) : (
+      <ol class="mt-8 flex flex-col border-t border-line">
+        {articles.map((article, index) => {
+          const { data } = article;
+          const category = categoryMap.get(data.category.id);
+          const tone = accentClasses[category?.data.accent ?? "brand"];
+          return (
+            <li class="group relative border-b border-line">
+              {/* Accent rail grows in on hover, tying the row to its category. */}
+              <span
+                aria-hidden="true"
+                class:list={[
+                  "absolute inset-y-0 left-0 w-px scale-y-0 transition-transform duration-300 group-hover:scale-y-100",
+                  tone.dot,
+                ]}
+              />
+
+              <article class="relative flex flex-col gap-3 px-2 py-6 transition-colors duration-300 group-hover:bg-surface-800/60 md:flex-row md:items-baseline md:gap-8 md:px-5">
+                <div class="flex shrink-0 items-center gap-3 font-mono text-2xs tracking-widest md:w-14">
+                  <span class="text-ink-faint transition-colors duration-300 group-hover:text-brand-ink">
+                    {pad(index + 1)}
+                  </span>
+                  <span
+                    class:list={[
+                      "size-1.5 rounded-full opacity-40 transition-opacity duration-300 group-hover:opacity-100",
+                      tone.dot,
+                    ]}
+                  />
+                </div>
+
+                {/* headline + meta */}
+                <div class="min-w-0 flex-1">
+                  <div class="flex flex-wrap items-baseline gap-x-3 gap-y-2">
+                    <h3 class="text-base font-bold leading-snug tracking-tight text-ink transition-colors duration-300 group-hover:text-brand-ink md:text-lg">
+                      <a href={`/articles/${article.id}`} class="after:absolute after:inset-0">
+                        {data.title}
+                      </a>
+                    </h3>
+                    <span
+                      class:list={[
+                        "inline-flex items-center rounded border px-1.5 py-0.5 font-mono text-3xs uppercase tracking-widest",
+                        tone.border,
+                        tone.bg,
+                        tone.text,
+                      ]}
+                    >
+                      {category?.data.name ?? data.category.id}
+                    </span>
+                  </div>
+
+                  <p class="mt-2 line-clamp-2 max-w-3xl text-sm leading-relaxed text-ink-muted">
+                    {data.description}
+                  </p>
+                </div>
+
+                {/* date / read time, right-aligned on wide screens */}
+                <div class="flex shrink-0 items-center gap-4 font-mono text-2xs uppercase tracking-widest text-ink-faint md:w-56 md:justify-end">
+                  <span>{readMinutes(article)} min</span>
+                  <span class="text-line-strong">|</span>
+                  <time datetime={isoDate(data.pubDate)}>{formatDate(data.pubDate)}</time>
+                  <span
+                    aria-hidden="true"
+                    class="hidden text-brand-ink opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100 md:inline"
+                  >
+                    →
+                  </span>
+                </div>
+              </article>
+            </li>
+          );
+        })}
+      </ol>
+    )
+  }
+</SectionWrapper>

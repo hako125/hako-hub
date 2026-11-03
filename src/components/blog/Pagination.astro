@@ -1,0 +1,78 @@
+---
+/**
+ * Page navigation for the article listing.
+ *
+ * `basePath` is the URL the pages live under; page 1 is the bare path and every
+ * later page is `${basePath}/page/${n}`, so the root listing stays at /articles.
+ */
+interface Props {
+  page: number;
+  totalPages: number;
+  basePath: string;
+}
+
+const { page, totalPages, basePath } = Astro.props;
+
+const hrefFor = (target: number) =>
+  target === 1 ? basePath : `${basePath}/page/${target}`;
+
+// Compact window: first, last, and one either side of the current page.
+const window = new Set([1, totalPages, page - 1, page, page + 1]);
+const pages = [...window]
+  .filter((value) => value >= 1 && value <= totalPages)
+  .sort((a, b) => a - b);
+
+const linkClass =
+  "flex h-10 min-w-10 items-center justify-center rounded-md border border-line bg-glass px-3 font-mono text-2xs uppercase tracking-widest text-ink-muted transition-colors hover:border-brand/50 hover:text-brand-ink";
+---
+
+{
+  totalPages > 1 && (
+    <nav
+      aria-label="Article pagination"
+      class="mt-10 flex flex-wrap items-center justify-center gap-2"
+    >
+      {page > 1 ? (
+        <a href={hrefFor(page - 1)} rel="prev" class={linkClass} aria-label="Previous page">
+          ← prev
+        </a>
+      ) : (
+        <span class:list={[linkClass, "pointer-events-none opacity-40"]} aria-hidden="true">
+          ← prev
+        </span>
+      )}
+
+      {pages.map((target, index) => {
+        const previous = pages[index - 1];
+        const gap = previous !== undefined && target - previous > 1;
+        return (
+          <>
+            {gap && <span class="px-1 font-mono text-2xs text-ink-faint">…</span>}
+            {target === page ? (
+              <span
+                aria-current="page"
+                class="flex h-10 min-w-10 items-center justify-center rounded-md border border-brand/50 bg-brand-soft px-3 font-mono text-2xs uppercase tracking-widest text-brand-ink"
+              >
+                {target}
+              </span>
+            ) : (
+              <a href={hrefFor(target)} class={linkClass}>
+                {target}
+              </a>
+            )}
+          </>
+        );
+      })}
+
+      {page < totalPages ? (
+        <a href={hrefFor(page + 1)} rel="next" class={linkClass} aria-label="Next page">
+          next →
+        </a>
+      ) : (
+        <span class:list={[linkClass, "pointer-events-none opacity-40"]} aria-hidden="true">
+          next →
+        </span>
+      )}
+    </nav>
+  )
+}
