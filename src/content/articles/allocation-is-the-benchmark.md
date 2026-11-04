@@ -4,7 +4,6 @@ description: "Why the fastest Rust parser I wrote was the one that stopped alloc
 pubDate: 2025-10-09
 category: systems
 tags: ["Rust", "Performance", "Profiling"]
-minutes: 8
 ---
 
 I had a parser doing 180k packets per second. The profile said 71% of the time was in

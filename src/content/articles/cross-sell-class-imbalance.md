@@ -1,15 +1,12 @@
 ---
-title: "Cross-Sell Models Fail on Class Imbalance, Not on Algorithms"
-description: "Swapping XGBoost for a neural net does nothing if 88% of your labels are one class. A short field note from an insurance ML project."
-pubDate: 2026-01-04
-category: ai-ml
-tags: ["Python", "Machine Learning", "Imbalanced Data"]
-minutes: 7
+title: "[Rust开发AI Agent] 如何接入LLM"
+description: "使用Rust接入LLM，以及接入时的一些常见坑点"
+pubDate: 2026-11-04
+category: ai-agent
+tags: ["Rust", "Agent"]
 ---
 
-The dataset had 381,109 rows and the target was almost entirely zeros: only 12.3% of
-customers had responded to a previous campaign. The first model scored 87.7% accuracy
-and was, for all practical purposes, a constant predictor.
+> 参考视频：https://www.bilibili.com/video/BV1dyjL6LE7B?spm_id_from=333.788.videopod.sections&vd_source=29318665ff9f1884a88ad866a2912804
 
 ## Accuracy is the wrong dashboard
 

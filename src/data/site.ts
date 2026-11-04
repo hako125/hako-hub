@@ -4,12 +4,12 @@ export const site = {
   tagline: "Fullstack Developer & AI Enthusiast",
   title: "Hako Hub",
   description: "Personal",
-  email: "adityaalok.0088@gmail.com",
+  email: "xz985598341@qq.com",
   github: "https://github.com/Adi2329002",
   githubHandle: "Adi2329002",
   linkedin: "https://www.linkedin.com/in/adityaalok0088",
   linkedinHandle: "adityaalok0088",
-  node: "Bhubaneswar, IN",
+  node: "Shenzhen, CN",
   year: 2026,
 };
 
@@ -67,37 +67,6 @@ export const heroTags = [
       "border-tag-c/35 bg-tag-c/10 text-tag-c shadow-[0_0_10px_var(--tag-c)]/10",
   },
 ];
-
-export const profile = {
-  name: "Aditya Alok",
-  education: "B.Tech CSCE @ KIIT University",
-  baseLocation: "Patna, Bihar -> Bhubaneswar",
-  currentFocus: [
-    "Offensive/Defensive Security",
-    "Hardware Level Optimization",
-    "Machine Learning Models",
-  ],
-  offlineInterests: ["Riding Bikes", "Rock Music", "Cars", "Books"],
-};
-
-export const experiences = [
-  {
-    title: "Smart India Hackathon",
-    year: "2024",
-    role: "> Runner-Up (Hardware Edition)",
-    description:
-      "Designed and engineered a hardware-based Search and Rescue Bot to navigate hazardous environments and assist in complex disaster recovery operations.",
-    accent: "brand",
-  },
-  {
-    title: "National Univ. of Singapore",
-    year: "2025",
-    role: "> Global Immersion Intern",
-    description:
-      "Collaborated on advanced data science and Machine Learning projects, specifically leading a team to build an AI model for health insurance cross-sell predictions.",
-    accent: "soft",
-  },
-] as const;
 
 export type ProjectTrack = "hardware" | "ai" | "systems" | "web" | "infra";
 
@@ -208,7 +177,7 @@ export const projects: Project[] = [
     repo: null,
     track: "infra",
     year: 2024,
-  },
+  },  
 ];
 
 /** The headline projects shown on the landing page, newest first. */

@@ -137,16 +137,45 @@ export function paginate<T>(
   };
 }
 
-/** Rough read time from the raw markdown body, at 200 words per minute. */
-export function estimateMinutes(body: string | undefined): number {
-  if (!body) return 1;
-  const words = body.trim().split(/\s+/).length;
-  return Math.max(1, Math.round(words / 200));
+/**
+ * Reading speed assumptions, per minute. Latin scripts are counted in words,
+ * CJK in characters — Chinese has no spaces to split on, so whitespace-based
+ * word counts would under-report a Chinese post by roughly an order of
+ * magnitude. Mixing both numbers keeps bilingual posts honest.
+ */
+const WORDS_PER_MINUTE = 200;
+const CJK_CHARS_PER_MINUTE = 400;
+
+/** CJK ideographs, kana, and hangul — scripts read character by character. */
+const CJK_CHAR = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uac00-\ud7af]/g;
+
+/**
+ * Strip the parts of the markdown source a reader never reads as prose:
+ * fenced code blocks, inline code, and link/image targets. Leaving them in
+ * inflates the estimate on posts that are mostly snippets or URLs.
+ */
+function readableText(body: string): string {
+  return body
+    .replace(/^```[\s\S]*?^```/gm, " ")
+    .replace(/`[^`\n]*`/g, " ")
+    .replace(/!?\[[^\]]*\]\([^)]*\)/g, " ")
+    .replace(/^\s*\[[^\]]+\]:\s*\S+.*$/gm, " ");
 }
 
-/** Resolved read time: an explicit frontmatter value always wins. */
+/** Rough read time from the raw markdown body, in whole minutes. */
+export function estimateMinutes(body: string | undefined): number {
+  if (!body) return 1;
+  const text = readableText(body);
+  const cjkChars = text.match(CJK_CHAR)?.length ?? 0;
+  const otherWords = text.replace(CJK_CHAR, " ");
+  const words = otherWords.trim() ? otherWords.trim().split(/\s+/).length : 0;
+  const minutes = cjkChars / CJK_CHARS_PER_MINUTE + words / WORDS_PER_MINUTE;
+  return Math.max(1, Math.round(minutes));
+}
+
+/** Read time shown in the UI, always derived from the body. */
 export function readMinutes(article: Article): number {
-  return article.data.minutes ?? estimateMinutes(article.body);
+  return estimateMinutes(article.body);
 }
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {

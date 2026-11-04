@@ -4,7 +4,6 @@ description: "STRIDE in forty minutes, and the four questions that actually chan
 pubDate: 2025-11-27
 category: security
 tags: ["Threat Modelling", "STRIDE", "Web"]
-minutes: 5
 ---
 
 Threat modelling has a reputation for being a two-week workshop with a spreadsheet.

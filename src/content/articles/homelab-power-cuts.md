@@ -4,7 +4,6 @@ description: "Proxmox plus TrueNAS, three UPS rules, and the automation that let
 pubDate: 2025-12-12
 category: homelab
 tags: ["Proxmox", "TrueNAS", "Linux"]
-minutes: 6
 ---
 
 The rack started as a single machine I could hear from the next room. It is now three

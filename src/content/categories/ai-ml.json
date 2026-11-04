@@ -1,7 +1,0 @@
-{
-  "name": "AI & ML",
-  "abbr": "AIML",
-  "description": "Models, experiments, and the practical engineering required to ship them without falling over.",
-  "accent": "tag-b",
-  "order": 30
-}

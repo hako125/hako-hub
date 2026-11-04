@@ -31,8 +31,6 @@ const articles = defineCollection({
     category: reference("categories"),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
-    /** Estimated read time in minutes; computed from the body when omitted. */
-    minutes: z.number().optional(),
   }),
 });
 

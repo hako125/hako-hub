@@ -4,7 +4,6 @@ description: "Building a packet sniffer from scratch taught me more about the ne
 pubDate: 2026-01-18
 category: systems
 tags: ["Rust", "Networking", "pcap"]
-minutes: 9
 ---
 
 Most networking tutorials stop at `tcpdump -i any` and call it a day. That is fine
