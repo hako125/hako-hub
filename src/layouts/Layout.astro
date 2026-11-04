@@ -68,12 +68,15 @@ const { title = site.title, description = site.description } = Astro.props;
 
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://www.adityaalok.dev/" />
-    <meta property="og:image" content="/og-image.png" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
 
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:image" content="/og-image.png" />
+    <!--
+      Share cards render without an image for now. Drop `twitter:card` back to
+      "summary_large_image" and re-add og:image / twitter:image once an
+      up-to-date card is produced by scripts/generate-og-image.mjs.
+    -->
+    <meta property="twitter:card" content="summary" />
     <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={description} />
   </head>

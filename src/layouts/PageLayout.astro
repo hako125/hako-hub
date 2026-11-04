@@ -56,12 +56,15 @@ const pageTitle = `${title} · ${site.title}`;
 
     <meta property="og:type" content={type} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content="/og-image.png" />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
 
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:image" content="/og-image.png" />
+    <!--
+      Share cards render without an image for now. Drop `twitter:card` back to
+      "summary_large_image" and re-add og:image / twitter:image once an
+      up-to-date card is produced by scripts/generate-og-image.mjs.
+    -->
+    <meta property="twitter:card" content="summary" />
     <meta property="twitter:title" content={pageTitle} />
     <meta property="twitter:description" content={description} />
 
