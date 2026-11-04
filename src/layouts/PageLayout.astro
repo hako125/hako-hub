@@ -24,11 +24,24 @@ const pageTitle = `${title} · ${site.title}`;
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/programming.png" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!--
+      Poppins is self-hosted from /fonts (see @font-face in global.css).
+      Preloading only the two weights used above the fold avoids the
+      render-blocking third-party stylesheet this page used to wait on.
+    -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      href="/fonts/poppins-400.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/poppins-700.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
