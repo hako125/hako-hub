@@ -42,7 +42,7 @@ rust中可以用**dotenvy**这个crate来读取.env文件中的内容并加载�
 
 ### 2. 构造提示词
 
-对于LLM，提示词并不是一段普通的字符串，还包含 role, name等信息。
+对于LLM，提示词并不是一段普通的字符串，而是一个结构体，还包含 role, name等信息。
 
 ```json
 { "role": "system",    "content": "你是一名全能助手" },
@@ -117,3 +117,4 @@ let content = response
 
 ## 代码
 
+https://github.com/hako125/rust-ai-agent/tree/feature/request-ds-llm-api
